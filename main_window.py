@@ -15,4 +15,5 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resize(800, 600)
         self.setMinimumSize(self.size()/2)
 
-        self.setCentralWidget(image_viewer_widget.ImageViewerWidget(parent=self))
+        self.setCentralWidget(
+            image_viewer_widget.ImageViewerWidget(parent=self))
