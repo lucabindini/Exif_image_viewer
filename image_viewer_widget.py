@@ -111,7 +111,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
     # Method that opens the dialog with Exif datas
     def show_exif(self) -> None:
-        pass
+        self.images[self.images_list.currentRow()].get_exif()
 
     # Method that rotates the selected image
     def rotate_image(self, clockwise: bool = True) -> None:

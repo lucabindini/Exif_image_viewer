@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import qdarkgraystyle
 
 import image_viewer_widget
@@ -12,6 +12,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         self.setStyleSheet(qdarkgraystyle.load_stylesheet_pyqt5())
         self.setWindowTitle('Exif Image Viewer')
+        self.setWindowIcon(QtGui.QIcon('img/favicon.ico'))
         self.resize(800, 600)
         self.setMinimumSize(self.size()/2)
 
