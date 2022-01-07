@@ -1,3 +1,6 @@
 **/__pycache__
 img/icons
+build
+dist
+*.spec
 .vscode
