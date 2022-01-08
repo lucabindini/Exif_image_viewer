@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 
 from PyQt5 import QtWidgets, QtGui
 import qdarkgraystyle
@@ -9,7 +10,7 @@ import image_viewer_widget
 class MainWindow(QtWidgets.QMainWindow):
 
     ICONS_PATH = 'img/icons/fugue-icons-3.5.6/icons/'
-    if hasattr(sys, '_MEIPASS'):    #change path when the executable app is running
+    if hasattr(sys, '_MEIPASS'):  # change path when the executable app is running
         ICONS_PATH = os.path.join(sys._MEIPASS, ICONS_PATH)
 
     def __init__(self, *args, **kwargs) -> None:

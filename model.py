@@ -1,4 +1,5 @@
 import os
+import webbrowser
 
 from PIL import Image, ImageQt, ImageOps, ExifTags
 
@@ -31,35 +32,35 @@ class ModelImage():
                     self.has_gps = True
                 else:
                     self._exif[decoded_tag] = value
+        return self._exif
 
-        if self.has_gps:
-            lat, lon = self.get_gps_coordinates()
-            #print(lat, lon)
-
+    # Method that find extra ifd tags
     def add_extra_ifd_tags(self):
         for tag, value in ExifTags.TAGS.items():
-            if value == "ExifOffset":
+            if value == 'ExifOffset':
                 break
         info = self._image.getexif().get_ifd(tag)
-        self._exif.update({ExifTags.TAGS.get(tag, tag)
-                          : value for tag, value in info.items()})
+        self._exif.update({ExifTags.TAGS.get(tag, tag): value for tag, value in info.items()})
 
+    # Method that find GPS tags
     def add_extra_gps_tags(self):
         for tag, value in ExifTags.TAGS.items():
-            if value == "GPSInfo":
+            if value == 'GPSInfo':
                 break
         gps_info = self._image.getexif().get_ifd(tag)
-        self._exif.update({ExifTags.GPSTAGS.get(tag, tag)
-                          : value for tag, value in gps_info.items()})
+        self._exif.update({ExifTags.GPSTAGS.get(tag, tag): value for tag, value in gps_info.items()})
 
+    # Method that verify if a specified tag exists
     def get_tag_if_exist(self, tag):
         if tag in self._exif:
             return self._exif[tag]
         return None
 
+    # Method that convert dms coordinates in degrees
     def to_degrees(self, value):
         return round(float(value[0]) + (float(value[1]) / 60.0) + (float(value[2]) / 3600.0), 6)
 
+    # Method that obtain latitude and longitude from GPS tags
     def get_gps_coordinates(self):
         lat = None
         lon = None
@@ -76,3 +77,10 @@ class ModelImage():
             if gps_lon_ref[0] != 'E':
                 lon = 0 - lon
         return lat, lon
+
+    # Method that open Google Maps at the image location
+    def open_maps(self):
+        if self.has_gps:
+            lat, lon = self.get_gps_coordinates()
+            webbrowser.open(
+                f'https://www.google.com/maps/search/?api=1&query={lat},{lon}', 2)

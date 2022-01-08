@@ -111,7 +111,18 @@ class ImageViewerWidget(QtWidgets.QWidget):
 
     # Method that opens the dialog with Exif datas
     def show_exif(self) -> None:
-        self.images[self.images_list.currentRow()].get_exif()
+        if self.images[self.images_list.currentRow()].get_exif():
+            exif_box = ExifBox(
+                self.images[self.images_list.currentRow()], parent=self)
+            if not exif_box.exec():
+                return
+        else:
+            msg = QtWidgets.QMessageBox(parent=self)
+            msg.setIcon(QtWidgets.QMessageBox.Critical)
+            msg.setText('No Exif tags')
+            msg.setInformativeText(
+                'No available exif tags for the selected image')
+            msg.exec()
 
     # Method that rotates the selected image
     def rotate_image(self, clockwise: bool = True) -> None:
@@ -168,3 +179,45 @@ class ImageQLabel(QtWidgets.QLabel):
         except AttributeError:
             pass
         return super().resizeEvent(a0)
+
+
+# Subclass that extends QLabel and adds the possibility to handle and correctly resize (w.r.t aspect ratio) an image
+class ExifBox(QtWidgets.QDialog):
+
+    def __init__(self, image: ModelImage, parent=None) -> None:
+        super().__init__(parent)
+
+        self.setWindowTitle(f'Exif data of {image.name} image')
+        self.resize(400, 600)
+
+        v_layout = QtWidgets.QVBoxLayout()
+        table_widget = QtWidgets.QTableWidget()
+        table_widget.setRowCount(len(image.get_exif().keys()))
+        table_widget.setColumnCount(2)
+        columns = ['tag', 'value']
+        table_widget.setHorizontalHeaderLabels(columns)
+        index = 0
+
+        for k, v in image.get_exif().items():
+            table_widget.setItem(index, 0, QtWidgets.QTableWidgetItem(k))
+            table_widget.setItem(index, 1, QtWidgets.QTableWidgetItem(str(v)))
+            index += 1
+
+        table_widget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        table_widget.setEditTriggers(
+            QtWidgets.QAbstractItemView.NoEditTriggers)
+        v_layout.addWidget(table_widget)
+
+        gps_btn_widget = QtWidgets.QWidget()
+        gps_btn_layout = QtWidgets.QHBoxLayout()
+        gps_btn_layout.addStretch()
+        gps_btn = QtWidgets.QPushButton(QtGui.QIcon(
+            f'{parent.window().ICONS_PATH}marker.png'), 'Show photo location in Google maps')
+        gps_btn.released.connect(image.open_maps)
+        gps_btn_layout.addWidget(gps_btn)
+        gps_btn_layout.addStretch()
+        gps_btn_widget.setLayout(gps_btn_layout)
+        if image.has_gps:
+            v_layout.addWidget(gps_btn_widget)
+
+        self.setLayout(v_layout)
