@@ -27,6 +27,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         open_image_layout.addStretch()
         open_image_btn = QtWidgets.QPushButton(QtGui.QIcon(
             f'{self.window().ICONS_PATH}image-sunset.png'), 'Open an image')
+        open_image_btn.setToolTip('[Ctrl+O]')
         open_image_btn.released.connect(self.open_image)
         open_image_layout.addWidget(open_image_btn)
         open_image_layout.addStretch()
@@ -40,12 +41,13 @@ class ImageViewerWidget(QtWidgets.QWidget):
         top_btn_layout = QtWidgets.QHBoxLayout()
         toggle_btn = QtWidgets.QPushButton(QtGui.QIcon(
             f'{self.window().ICONS_PATH}application-sidebar-list.png'), '')
-        toggle_btn.setToolTip('Toggle image list')
+        toggle_btn.setToolTip('Toggle image list [Ctrl+T]')
         toggle_btn.released.connect(self.toggle_list)
         top_btn_layout.addWidget(toggle_btn)
         top_btn_layout.addStretch()
         exif_btn = QtWidgets.QPushButton(QtGui.QIcon(
             f'{self.window().ICONS_PATH}information.png'), 'Show Exif data')
+        exif_btn.setToolTip('[Ctrl+E]')
         exif_btn.released.connect(self.show_exif)
         top_btn_layout.addWidget(exif_btn)
         top_btn_widget.setLayout(top_btn_layout)
@@ -63,13 +65,14 @@ class ImageViewerWidget(QtWidgets.QWidget):
         rotate_btn_layout.addStretch()
         left_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(
             f'{self.window().ICONS_PATH}arrow-circle-135-left.png'), '')
-        left_rot_btn.setToolTip('Rotate 90 degrees counterclockwise')
+        left_rot_btn.setToolTip(
+            'Rotate 90 degrees counterclockwise [Ctrl+Shift+R]')
         left_rot_btn.released.connect(
             lambda: self.rotate_image(clockwise=False))
         rotate_btn_layout.addWidget(left_rot_btn)
         right_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(
             f'{self.window().ICONS_PATH}arrow-circle.png'), '')
-        right_rot_btn.setToolTip('Rotate 90 degrees clockwise')
+        right_rot_btn.setToolTip('Rotate 90 degrees clockwise [Ctrl+R]')
         right_rot_btn.released.connect(
             lambda: self.rotate_image(clockwise=True))
         rotate_btn_layout.addWidget(right_rot_btn)
@@ -82,6 +85,8 @@ class ImageViewerWidget(QtWidgets.QWidget):
         h_layout.addWidget(self.display_widget,
                            100 * (self.proportion-1) // self.proportion)
         self.setLayout(h_layout)
+
+        self.configure_hotkeys()
 
         self.display_widget.setVisible(False)
 
@@ -99,6 +104,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
         if image_path:
             if not self.display_widget.isVisible():
                 self.display_widget.setVisible(True)
+                self.configure_hotkeys()
             self.images.append(ModelImage(path=image_path))
             self.images_list.addItem(
                 self.images[self.images_list.count()].name)
@@ -133,12 +139,34 @@ class ImageViewerWidget(QtWidgets.QWidget):
         self.image_label.set_image(
             self.images[self.images_list.currentRow()].get_image())
 
+    def configure_hotkeys(self) -> None:
+        if self.display_widget.isVisible():
+            right_rot_shrt = QtWidgets.QShortcut(
+                QtGui.QKeySequence('Ctrl+R'), self)
+            right_rot_shrt.activated.connect(
+                lambda: self.rotate_image(clockwise=True))
+            left_rot_shrt = QtWidgets.QShortcut(
+                QtGui.QKeySequence('Ctrl+Shift+R'), self)
+            left_rot_shrt.activated.connect(
+                lambda: self.rotate_image(clockwise=False))
+            exif_shrt = QtWidgets.QShortcut(
+                QtGui.QKeySequence('Ctrl+E'), self)
+            exif_shrt.activated.connect(self.show_exif)
+            toggle_list_shrt = QtWidgets.QShortcut(
+                QtGui.QKeySequence('Ctrl+T'), self)
+            toggle_list_shrt.activated.connect(self.toggle_list)
+        else:
+            open_img_shrt = QtWidgets.QShortcut(
+                QtGui.QKeySequence('Ctrl+O'), self)
+            open_img_shrt.activated.connect(self.open_image)
+
 
 # Subclass that extends QList and adds the possibility to have a placeholder text
 class ImagesListWidget(QtWidgets.QListWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.placeholder_text = 'Open your first image by clicking "Open an image" button'
+        self.placeholder_text = 'Open your first image by clicking "Open an image" button\
+             \nor Ctrl+O (cmd+O on macOS)'
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -157,7 +185,7 @@ class ImagesListWidget(QtWidgets.QListWidget):
 # Subclass that extends QLabel and adds the possibility to handle and correctly resize (w.r.t aspect ratio) an image
 class ImageQLabel(QtWidgets.QLabel):
 
-    MAX_DIM = 1024
+    MAX_DIM = 512
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
