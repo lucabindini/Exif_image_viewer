@@ -127,7 +127,7 @@ class ImageViewerWidget(QtWidgets.QWidget):
             msg.setIcon(QtWidgets.QMessageBox.Critical)
             msg.setText('No Exif tags')
             msg.setInformativeText(
-                'No available exif tags for the selected image')
+                'No available Exif tags for the selected image')
             msg.exec()
 
     # Method that rotates the selected image

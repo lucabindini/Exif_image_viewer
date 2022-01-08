@@ -41,7 +41,7 @@ The application implements the following features:
 **N.B** in macOS ```Ctrl``` is replaced by ```cmd```
 
 <p align="center">
-<img src="img/app_usage.gif" width="80%">
+<img src="img/app_usage.gif" width="50%">
 </p>
 
 ## License
